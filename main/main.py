@@ -29,28 +29,26 @@ logging.basicConfig(
 )
 
 def main():
-    # 2. 配置参数
-    symbol   = "BTCUSDT"
-    interval = "1h"
-    start_dt = datetime(2024, 1, 1)
-    end_dt   = datetime.now()
+    symbol = 'BTCUSDT'
+    intervals = ['15m', '1h', '4h', '1d']
+    start = '2024-01-01'
+    end = '2024-07-01'
 
-    logging.info(f"开始执行主流程：{symbol} [{interval}] 从 {start_dt} 到 {end_dt}")
+    for interval in intervals:
+        print(f"\n>>> 开始处理 {symbol} - {interval}")
 
-    # 3. 更新数据库
-    update_klines(symbol, interval, start_dt, end_dt)
+        # 1. 更新数据（增量更新）
+        update_klines(symbol, interval, start, end)
 
-    # 4. 从数据库加载数据
-    df = load_klines(symbol, interval, start_dt, end_dt)
-    if df.empty:
-        logging.error("加载到的数据为空，检查数据库或时间范围设置！")
-        return
+        # 2. 从数据库加载数据
+        df = load_klines(symbol, interval, start, end)
+        if df.empty:
+            print(f"[ERROR] {symbol} - {interval} 没有加载到数据！")
+            continue
 
-    logging.info(f"加载到 {len(df)} 条数据，准备绘图")
+        # 3. 绘制蜡烛图
+        plot_candlestick(df, symbol, interval)
+        print(f">>> {symbol} - {interval} 绘图完成\n")
 
-    # 5. 绘图
-    plot_candlestick(df, symbol, interval)
-    logging.info("绘图完成，程序结束。")
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
